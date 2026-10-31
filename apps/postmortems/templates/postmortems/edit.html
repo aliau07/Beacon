@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Edit · {{ postmortem.title }}{% endblock %}
+{% block content %}
+  <nav class="small mb-2"><a href="{{ incident.get_absolute_url }}">Incident #{{ incident.pk }}</a> / <a href="{{ postmortem.get_absolute_url }}">Postmortem</a> / Edit</nav>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <form method="post" class="card card-body" novalidate>
+        <h1 class="h4">Edit postmortem</h1>
+        {% csrf_token %}
+        {% include 'core/includes/form_fields.html' %}
+        <div class="d-flex gap-2"><button class="btn btn-primary">Save</button>
+          <a class="btn btn-outline-secondary" href="{{ postmortem.get_absolute_url }}">Back</a></div>
+      </form>
+    </div>
+    <div class="col-lg-5">
+      <div class="card card-body">
+        <h2 class="h5">Timeline</h2>
+        <p class="small text-muted">Copied from the incident. Add what happened outside Beacon, like deploys or customer reports.</p>
+        <ul class="timeline">
+          {% for event in events %}<li><div class="small text-muted">{{ event.occurred_at|date:"D j M H:i" }}</div>{{ event.description }}</li>{% endfor %}
+        </ul>
+        <form method="post" action="{% url 'postmortems:event_add' postmortem.pk %}" novalidate>
+          {% csrf_token %}
+          {% with form=event_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <button class="btn btn-sm btn-outline-primary">Add to timeline</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

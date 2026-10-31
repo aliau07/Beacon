@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+{% block title %}Incidents{% endblock %}
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="mb-0">Incidents</h1>
+    {% if teams|length == 1 %}
+      <a class="btn btn-outline-danger" href="{% url 'incidents:create' teams.0.slug %}">Trigger an incident</a>
+    {% elif teams %}
+      <div class="dropdown">
+        <button class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown">Trigger an incident</button>
+        <ul class="dropdown-menu dropdown-menu-end">{% for team in teams %}<li><a class="dropdown-item" href="{% url 'incidents:create' team.slug %}">{{ team.name }}</a></li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+  </div>
+  {% if not teams %}
+    <div class="card card-body mb-3">You're not on a team yet. <a href="{% url 'teams:list' %}">Create or join a team</a> to see incidents.</div>
+  {% endif %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-sm-4 col-lg-3">{{ form.status }}</div>
+    <div class="col-sm-4 col-lg-3">{{ form.team }}</div>
+    <div class="col-sm-4 col-lg-3">{{ form.severity }}</div>
+    <div class="col-lg-3"><button class="btn btn-outline-secondary w-100">Filter</button></div>
+  </form>
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>#</th><th>Summary</th><th>Service</th><th>Severity</th><th>Status</th><th>Triggered</th></tr></thead>
+        <tbody>
+          {% for incident in incidents %}
+            <tr>
+              <td>{{ incident.pk }}</td>
+              <td><a href="{{ incident.get_absolute_url }}">{{ incident.summary }}</a>{% if incident.alert_count > 1 %} <span class="badge text-bg-light border" title="Grouped alerts">&times;{{ incident.alert_count }}</span>{% endif %}</td>
+              <td>{{ incident.service.name }} <span class="small text-muted">{{ incident.team.name }}</span></td>
+              <td><span class="badge {{ incident.severity|severity_badge }}">{{ incident.get_severity_display }}</span></td>
+              <td><span class="badge {{ incident.status_badge }}">{{ incident.get_status_display }}</span></td>
+              <td class="small text-muted" title="{{ incident.created_at }}">{{ incident.created_at|timesince }} ago</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="text-muted">No incidents match. Quiet is good.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="mt-3">{% include 'core/includes/pagination.html' %}</div>
+{% endblock %}

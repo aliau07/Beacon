@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{% if rotation %}Edit{% else %}New{% endif %} rotation · {{ schedule.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="row"><div class="col-lg-7">
+    <form method="post" class="card card-body" novalidate>
+      <h2 class="h4">{% if rotation %}Edit {{ rotation.name }}{% else %}New rotation for {{ schedule.name }}{% endif %}</h2>
+      <p class="text-muted">Handoffs happen at the handoff time on the rotation's local clock, so they stay put when
+        daylight saving time starts or ends.</p>
+      {% csrf_token %}
+      {% include 'core/includes/form_fields.html' %}
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save rotation</button>
+        <a href="{{ schedule.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div></div>
+{% endblock %}

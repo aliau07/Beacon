@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Trigger an incident · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="row"><div class="col-lg-7">
+    <form method="post" class="card card-body" novalidate>
+      <h2 class="h4">Trigger an incident</h2>
+      <p class="text-muted">The service's escalation policy pages people straight away, just like an API event.</p>
+      {% csrf_token %}
+      {% include 'core/includes/form_fields.html' %}
+      <div><button type="submit" class="btn btn-danger">Trigger</button></div>
+    </form>
+  </div></div>
+{% endblock %}

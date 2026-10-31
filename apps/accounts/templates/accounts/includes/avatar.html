@@ -1,0 +1,1 @@
+{% if person.avatar %}<img src="{{ person.avatar.url }}" alt="" class="avatar" width="{{ size|default:32 }}" height="{{ size|default:32 }}">{% else %}<span class="avatar" style="width: {{ size|default:32 }}px; height: {{ size|default:32 }}px; font-size: calc({{ size|default:32 }}px * .4);" aria-hidden="true">{{ person.initials }}</span>{% endif %}

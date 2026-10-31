@@ -1,0 +1,9 @@
+{% if segment %}
+  <span class="d-inline-flex align-items-center gap-2">
+    {% include 'accounts/includes/avatar.html' with person=segment.user size=24 %}
+    <span><strong>{{ segment.user.display_name }}</strong>
+      <span class="text-muted small">until {{ segment.ends_at|date:"D j M H:i" }}{% if segment.source == 'override' %} &middot; override{% endif %}</span></span>
+  </span>
+{% else %}
+  <span class="text-danger">Nobody on call</span>
+{% endif %}

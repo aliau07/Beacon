@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Schedules · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Schedules</h2>
+    {% if can_manage %}<a class="btn btn-primary" href="{% url 'oncall:schedule_create' team.slug %}">New schedule</a>{% endif %}
+  </div>
+  {% if rows %}
+    <div class="list-group">
+      {% for schedule, segment in rows %}
+        <a class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between gap-2" href="{{ schedule.get_absolute_url }}">
+          <span class="fw-semibold">{{ schedule.name }}</span>
+          {% include 'oncall/includes/on_call_badge.html' %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No schedules yet.</p>
+  {% endif %}
+{% endblock %}

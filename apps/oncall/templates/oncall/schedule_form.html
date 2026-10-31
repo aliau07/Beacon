@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}New schedule · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="row"><div class="col-lg-7">
+    <form method="post" class="card card-body" novalidate>
+      <h2 class="h4">New schedule</h2>
+      {% csrf_token %}
+      {% include 'core/includes/form_fields.html' %}
+      <div><button type="submit" class="btn btn-primary">Create schedule</button></div>
+    </form>
+  </div></div>
+{% endblock %}

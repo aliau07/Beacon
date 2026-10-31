@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Incident response and on-call{% endblock %}
+{% block content %}
+  <div class="py-5 text-center">
+    <h1 class="display-5 fw-semibold">Beacon</h1>
+    <p class="lead col-lg-7 mx-auto">Turn monitoring alerts into incidents, page whoever is on call, escalate when
+      nobody answers, keep customers informed with a status page and learn from every outage with postmortems.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a class="btn btn-primary btn-lg" href="{% url 'accounts:signup' %}">Create an account</a>
+      <a class="btn btn-outline-secondary btn-lg" href="{% url 'accounts:login' %}">Log in</a>
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4"><div class="card card-body h-100"><h2 class="h5">Events API</h2>
+      <p class="mb-0">Send trigger, acknowledge and resolve events with a per-service API key. Repeats of the same
+        problem are grouped into one incident by their dedup key.</p></div></div>
+    <div class="col-md-4"><div class="card card-body h-100"><h2 class="h5">On-call schedules</h2>
+      <p class="mb-0">Rotations hand off at a local clock time, even across daylight saving changes. Overrides
+        let teammates swap shifts.</p></div></div>
+    <div class="col-md-4"><div class="card card-body h-100"><h2 class="h5">Escalation</h2>
+      <p class="mb-0">If nobody acknowledges, Beacon pages the next level of the escalation policy by email and in
+        the in-app inbox.</p></div></div>
+  </div>
+{% endblock %}

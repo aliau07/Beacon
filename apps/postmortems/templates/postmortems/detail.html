@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}{{ postmortem.title }}{% endblock %}
+{% block content %}
+  <nav class="small mb-2"><a href="{{ incident.get_absolute_url }}">Incident #{{ incident.pk }}</a> / Postmortem</nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-1">{{ postmortem.title }}</h1>
+      <span class="badge {% if postmortem.status == 'published' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ postmortem.get_status_display }}</span>
+      <span class="small text-muted">{{ incident.service.name }} &middot; started by {{ postmortem.created_by.display_name|default:"someone" }}</span>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'postmortems:edit' postmortem.pk %}">Edit</a>
+      {% if postmortem.status == 'draft' %}
+        <form method="post" action="{% url 'postmortems:publish' postmortem.pk %}">{% csrf_token %}<button class="btn btn-primary">Publish</button></form>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card card-body mb-3"><h2 class="h5">Impact</h2><div class="pre-line">{{ postmortem.impact|default:"Not written yet." }}</div></div>
+      <div class="card card-body mb-3"><h2 class="h5">Root cause</h2><div class="pre-line">{{ postmortem.root_cause|default:"Not written yet." }}</div></div>
+      <div class="card card-body mb-3">
+        <h2 class="h5">Timeline</h2>
+        <ul class="timeline mb-0">
+          {% for event in events %}<li><div class="small text-muted">{{ event.occurred_at|date:"D j M H:i:s" }}</div><div class="pre-line">{{ event.description }}</div></li>{% endfor %}
+        </ul>
+      </div>
+      <div class="card card-body">
+        <h2 class="h5">Screenshots</h2>
+        <div class="row g-2 mb-3">
+          {% for screenshot in screenshots %}
+            <div class="col-sm-6">
+              <a href="{{ screenshot.image.url }}"><img src="{{ screenshot.image.url }}" alt="{{ screenshot.caption }}" class="img-fluid w-100 screenshot border rounded"></a>
+              <div class="d-flex justify-content-between small mt-1"><span>{{ screenshot.caption }}</span>
+                <form method="post" action="{% url 'postmortems:screenshot_delete' screenshot.pk %}">{% csrf_token %}<button class="btn btn-link btn-sm p-0 text-danger">Remove</button></form></div>
+            </div>
+          {% empty %}
+            <p class="text-muted">No screenshots yet.</p>
+          {% endfor %}
+        </div>
+        <form method="post" enctype="multipart/form-data" action="{% url 'postmortems:screenshot_add' postmortem.pk %}" novalidate>
+          {% csrf_token %}
+          {% with form=screenshot_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <button class="btn btn-sm btn-outline-primary">Upload</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header">Action items</div>
+        <ul class="list-group list-group-flush">
+          {% for item in action_items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+              <div class="{% if item.is_done %}text-decoration-line-through text-muted{% endif %}">{{ item.description }}
+                <div class="small text-muted">{% if item.owner %}{{ item.owner.display_name }}{% else %}unassigned{% endif %}{% if item.due_date %} &middot; due {{ item.due_date }}{% endif %}</div></div>
+              <form method="post" action="{% url 'postmortems:action_toggle' item.pk %}">{% csrf_token %}
+                <button class="btn btn-sm {% if item.is_done %}btn-outline-secondary{% else %}btn-outline-success{% endif %}">{% if item.is_done %}Reopen{% else %}Done{% endif %}</button></form>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No action items yet.</li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="{% url 'postmortems:action_add' postmortem.pk %}" class="card-body border-top" novalidate>
+          {% csrf_token %}
+          {% with form=action_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <button class="btn btn-sm btn-primary">Add action item</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

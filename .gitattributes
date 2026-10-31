@@ -1,0 +1,8 @@
+# Normalise line endings: LF in the repository, native on checkout.
+* text=auto
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+*.sqlite3 binary

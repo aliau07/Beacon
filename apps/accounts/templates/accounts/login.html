@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card card-body">
+        <h1 class="h3">Log in</h1>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% include 'core/includes/form_fields.html' %}
+          <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+        <p class="mt-3 mb-0 text-center">
+          New here? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,9 @@
+Hi {{ user.get_username }},
+
+Incident #{{ incident.pk }} on {{ incident.service.name }} is resolved. {{ reason }}
+
+  {{ incident.summary }}
+
+{{ site_url }}{{ incident_path }}
+
+Beacon

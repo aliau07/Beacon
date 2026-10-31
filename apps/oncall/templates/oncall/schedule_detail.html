@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{{ schedule.name }} · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h2 class="h4 mb-1">{{ schedule.name }}</h2>
+      {% if schedule.description %}<p class="text-muted mb-0">{{ schedule.description }}</p>{% endif %}
+    </div>
+    <div class="card card-body py-2"><span class="small text-muted">On call now</span>
+      {% with segment=current %}{% include 'oncall/includes/on_call_badge.html' %}{% endwith %}</div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card mb-4">
+        <div class="card-header">Next {{ preview_days }} days</div>
+        <ul class="list-group list-group-flush">
+          {% for segment in segments %}
+            <li class="list-group-item d-flex justify-content-between gap-2">
+              <span class="text-muted small">{{ segment.starts_at|date:"D j M H:i" }} &rarr; {{ segment.ends_at|date:"D j M H:i" }}</span>
+              <span>{% if segment.user %}{{ segment.user.display_name }} <span class="badge text-bg-light border">{{ segment.source }}</span>{% else %}<span class="text-danger">nobody</span>{% endif %}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Nobody is scheduled.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h3 class="h5 mb-0">Rotations</h3>
+        {% if can_manage %}<a class="btn btn-sm btn-outline-primary" href="{% url 'oncall:rotation_create' schedule.pk %}">Add rotation</a>{% endif %}
+      </div>
+      {% for rotation in rotations %}
+        <div class="card card-body mb-2">
+          <div class="d-flex justify-content-between">
+            <strong>{{ rotation.name }}</strong>
+            <span class="small text-muted">priority {{ rotation.priority }}</span>
+          </div>
+          <div class="small text-muted mb-2">
+            Every {{ rotation.shift_length_days }} day{{ rotation.shift_length_days|pluralize }}, handing off at
+            {{ rotation.handoff_time|time:"H:i" }} {{ rotation.time_zone }}, from {{ rotation.start_date }}
+          </div>
+          <ol class="mb-2">{% for participant in rotation.participants.all %}<li>{{ participant.user.display_name }}</li>{% endfor %}</ol>
+          {% if can_manage %}
+            <div class="d-flex gap-2">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'oncall:rotation_edit' rotation.pk %}">Edit</a>
+              <form method="post" action="{% url 'oncall:rotation_delete' rotation.pk %}">{% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Delete</button></form>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="text-muted">No rotations yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="col-lg-5">
+      <form method="post" action="{% url 'oncall:override_create' schedule.pk %}" class="card card-body mb-3" novalidate>
+        <h3 class="h5">Add an override</h3>
+        <p class="small text-muted">Overrides win over every rotation while they last.{% if not can_manage %} You can cover shifts yourself.{% endif %}</p>
+        {% csrf_token %}
+        {% with form=override_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+        <div><button class="btn btn-primary">Add override</button></div>
+      </form>
+      <div class="card">
+        <div class="card-header">Current and upcoming overrides</div>
+        <ul class="list-group list-group-flush">
+          {% for override in overrides %}
+            <li class="list-group-item d-flex justify-content-between gap-2">
+              <div>
+                <strong>{{ override.user.display_name }}</strong>
+                <div class="small text-muted">{{ override.starts_at|date:"D j M H:i" }} &rarr; {{ override.ends_at|date:"D j M H:i" }}{% if override.reason %} &middot; {{ override.reason }}{% endif %}</div>
+              </div>
+              <form method="post" action="{% url 'oncall:override_delete' override.pk %}">{% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Remove</button></form>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">None.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

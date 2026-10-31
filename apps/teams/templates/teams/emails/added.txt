@@ -1,0 +1,9 @@
+Hi {{ user.get_username }},
+
+{{ actor.display_name }} added you to {{ team.name }} on Beacon as a team {{ membership.get_role_display|lower }}.
+
+You may now be paged for this team's incidents. See the team here:
+
+{{ site_url }}{{ team_path }}
+
+Beacon

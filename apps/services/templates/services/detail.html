@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+{% block title %}{{ service.name }} · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h2 class="h4 mb-1">{{ service.name }}</h2>
+      {% if service.description %}<p class="text-muted mb-1">{{ service.description }}</p>{% endif %}
+      <div class="small">Escalation policy:
+        {% if service.escalation_policy %}<a href="{{ service.escalation_policy.get_absolute_url }}">{{ service.escalation_policy.name }}</a>{% else %}<span class="text-danger">none, so nobody is paged</span>{% endif %}</div>
+    </div>
+    {% if can_manage %}<a class="btn btn-outline-secondary" href="{% url 'services:edit' service.pk %}">Edit service</a>{% endif %}
+  </div>
+
+  {% if new_raw_key %}
+    <div class="alert alert-success" role="alert">
+      <h3 class="h5">API key "{{ new_key.name }}" created</h3>
+      <p class="mb-2">Copy it now. Beacon only keeps a hash of it, so <strong>it won't be shown again</strong>.</p>
+      <div class="input-group">
+        <input class="form-control api-key" id="new-api-key" value="{{ new_raw_key }}" readonly aria-label="New API key">
+        <button class="btn btn-outline-success" type="button" onclick="navigator.clipboard.writeText(document.getElementById('new-api-key').value)">Copy</button>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card mb-4">
+        <div class="card-header">Open incidents</div>
+        <ul class="list-group list-group-flush">
+          {% for incident in open_incidents %}
+            <li class="list-group-item d-flex gap-2 align-items-center">
+              <span class="badge {{ incident.severity|severity_badge }}">{{ incident.get_severity_display }}</span>
+              <a href="{{ incident.get_absolute_url }}" class="me-auto">#{{ incident.pk }} {{ incident.summary }}</a>
+              <span class="badge {{ incident.status_badge }}">{{ incident.get_status_display }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-success">No open incidents.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">Recently resolved</div>
+        <ul class="list-group list-group-flush">
+          {% for incident in recent_incidents %}
+            <li class="list-group-item"><a href="{{ incident.get_absolute_url }}">#{{ incident.pk }} {{ incident.summary }}</a>
+              <span class="small text-muted">resolved {{ incident.resolved_at|timesince }} ago</span></li>
+          {% empty %}
+            <li class="list-group-item text-muted">None yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card mb-3">
+        <div class="card-header">API keys</div>
+        <ul class="list-group list-group-flush">
+          {% for key in api_keys %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+              <div>
+                <div><span class="api-key">{{ key.prefix }}…</span> {{ key.name }}</div>
+                <div class="small text-muted">
+                  {% if key.is_active %}{% if key.last_used_at %}last used {{ key.last_used_at|timesince }} ago{% else %}never used{% endif %}{% else %}revoked {{ key.revoked_at|date:"j M Y" }}{% endif %}
+                </div>
+              </div>
+              {% if can_manage and key.is_active %}
+                <form method="post" action="{% url 'services:api_key_revoke' key.pk %}">{% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger">Revoke</button></form>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No API keys yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% if can_manage %}
+        <form method="post" action="{% url 'services:api_key_create' service.pk %}" class="card card-body" novalidate>
+          <h3 class="h5">New API key</h3>
+          {% csrf_token %}
+          {% with form=key_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <div><button class="btn btn-primary">Create key</button></div>
+        </form>
+      {% endif %}
+      <div class="card card-body mt-3 small">
+        <h3 class="h6">Send an event</h3>
+        <pre class="mb-0"><code>curl -X POST {{ request.scheme }}://{{ request.get_host }}{% url 'alerts:events' %} \
+  -H "Authorization: Bearer $BEACON_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"event_action": "trigger", "dedup_key": "disk-full-db1",
+       "summary": "Disk 95% full on db1", "severity": "critical"}'</code></pre>
+      </div>
+    </div>
+  </div>
+{% endblock %}

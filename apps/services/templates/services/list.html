@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Services · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Services</h2>
+    {% if can_manage %}<a class="btn btn-primary" href="{% url 'services:create' team.slug %}">New service</a>{% endif %}
+  </div>
+  {% if services %}
+    <div class="list-group">
+      {% for service in services %}
+        <a class="list-group-item list-group-item-action" href="{{ service.get_absolute_url }}">
+          <div class="d-flex justify-content-between"><span class="fw-semibold">{{ service.name }}</span>
+            <span class="small text-muted">{% if service.escalation_policy %}{{ service.escalation_policy.name }}{% else %}<span class="text-danger">no escalation policy</span>{% endif %}</span></div>
+          {% if service.description %}<div class="small text-muted">{{ service.description|truncatechars:120 }}</div>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No services yet.</p>
+  {% endif %}
+{% endblock %}

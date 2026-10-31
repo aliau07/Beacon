@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{{ policy.name }} · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <h2 class="h4">{{ policy.name }}</h2>
+  {% if policy.description %}<p class="text-muted">{{ policy.description }}</p>{% endif %}
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card mb-3">
+        <div class="card-header">Levels</div>
+        <ul class="list-group list-group-flush">
+          {% for level in levels %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+              <div><strong>Level {{ level.number }}:</strong> page {{ level.target_label }}
+                <div class="small text-muted">then wait {{ level.delay_minutes }} minute{{ level.delay_minutes|pluralize }} for an acknowledgement</div></div>
+              {% if can_manage %}
+                <form method="post" action="{% url 'escalation:level_delete' level.pk %}">{% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger">Remove</button></form>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="list-group-item text-danger">No levels yet: incidents on services using this policy page nobody.</li>
+          {% endfor %}
+          <li class="list-group-item small text-muted">
+            {% if policy.repeat_count %}If nobody acknowledges, run through the levels {{ policy.repeat_count }} more time{{ policy.repeat_count|pluralize }}.{% else %}Stops after the last level.{% endif %}
+          </li>
+        </ul>
+      </div>
+      {% if can_manage %}
+        <form method="post" action="{% url 'escalation:level_add' policy.pk %}" class="card card-body" novalidate>
+          <h3 class="h5">Add a level</h3>
+          {% csrf_token %}
+          {% with form=level_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <div><button class="btn btn-primary">Add level</button></div>
+        </form>
+      {% endif %}
+    </div>
+    <div class="col-lg-5">
+      {% if can_manage %}
+        <form method="post" class="card card-body" novalidate>
+          <h3 class="h5">Policy settings</h3>
+          {% csrf_token %}
+          {% include 'core/includes/form_fields.html' %}
+          <div><button class="btn btn-outline-primary">Save</button></div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

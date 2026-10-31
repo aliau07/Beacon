@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{ component.name }} · Status page{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="row"><div class="col-lg-7">
+    <form method="post" class="card card-body" novalidate>
+      <h2 class="h4">{{ component.name }}</h2>
+      <p class="text-muted">The status follows the worst open incident on the linked services. Set a manual status
+        to pin it (for maintenance, say) and clear it to go back to automatic.</p>
+      {% csrf_token %}
+      {% include 'core/includes/form_fields.html' %}
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn btn-outline-secondary" href="{% url 'statuspage:manage' team.slug %}">Cancel</a>
+      </div>
+    </form>
+  </div></div>
+{% endblock %}

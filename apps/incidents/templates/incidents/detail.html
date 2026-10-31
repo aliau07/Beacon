@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+{% block title %}#{{ incident.pk }} {{ incident.summary }}{% endblock %}
+{% block content %}
+  <nav class="small mb-2"><a href="{% url 'incidents:list' %}">Incidents</a> / {{ team.name }} / <a href="{{ incident.service.get_absolute_url }}">{{ incident.service.name }}</a></nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+      <h1 class="h3 mb-2">#{{ incident.pk }} {{ incident.summary }}</h1>
+      <span class="badge {{ incident.status_badge }}">{{ incident.get_status_display }}</span>
+      <span class="badge {{ incident.severity|severity_badge }}">{{ incident.get_severity_display }}</span>
+      <span class="small text-muted ms-2">{{ incident.get_source_display }} &middot; open {{ incident.duration|duration }}{% if incident.alert_count > 1 %} &middot; {{ incident.alert_count }} alerts grouped{% endif %}</span>
+    </div>
+    <div class="d-flex gap-2">
+      {% if can_acknowledge %}
+        <form method="post" action="{% url 'incidents:acknowledge' incident.pk %}">{% csrf_token %}<button class="btn btn-warning">Acknowledge</button></form>
+      {% endif %}
+      {% if can_resolve %}
+        <form method="post" action="{% url 'incidents:resolve' incident.pk %}">{% csrf_token %}<button class="btn btn-success">Resolve</button></form>
+      {% endif %}
+      {% if incident.status == 'resolved' %}
+        {% if incident.postmortem %}
+          <a class="btn btn-outline-primary" href="{{ incident.postmortem.get_absolute_url }}">Postmortem</a>
+        {% else %}
+          <form method="post" action="{% url 'postmortems:start' incident.pk %}">{% csrf_token %}<button class="btn btn-outline-primary">Write a postmortem</button></form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card card-body">
+        <h2 class="h5">Timeline</h2>
+        <ul class="timeline mb-3">
+          {% for entry in timeline %}
+            <li class="kind-{{ entry.kind }}">
+              <div class="small text-muted">{{ entry.created_at|date:"D j M H:i:s" }} &middot; {{ entry.get_kind_display }}{% if entry.kind == 'note' and entry.actor %} by {{ entry.actor.display_name }}{% endif %}</div>
+              <div class="pre-line">{{ entry.message }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="{% url 'incidents:note_add' incident.pk %}" novalidate>
+          {% csrf_token %}
+          {% with form=note_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <button class="btn btn-sm btn-outline-primary">Add note</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card card-body mb-3 small">
+        <dl class="mb-0">
+          <dt>Dedup key</dt><dd class="api-key">{{ incident.dedup_key }}</dd>
+          <dt>Triggered</dt><dd>{{ incident.created_at|date:"D j M Y H:i" }}</dd>
+          {% if incident.acknowledged_at %}<dt>Acknowledged</dt><dd>{{ incident.acknowledged_at|date:"D j M H:i" }}{% if incident.acknowledged_by %} by {{ incident.acknowledged_by.display_name }}{% endif %}</dd>{% endif %}
+          {% if incident.resolved_at %}<dt>Resolved</dt><dd>{{ incident.resolved_at|date:"D j M H:i" }}{% if incident.resolved_by %} by {{ incident.resolved_by.display_name }}{% endif %}</dd>{% endif %}
+        </dl>
+      </div>
+      {% if incident.details %}
+        <div class="card card-body mb-3 small"><h2 class="h6">Details</h2>
+          <dl class="mb-0">{% for key, value in incident.details.items %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}</dl></div>
+      {% endif %}
+      <div class="card">
+        <div class="card-header">Events received</div>
+        <ul class="list-group list-group-flush small">
+          {% for alert in alerts %}
+            <li class="list-group-item"><strong>{{ alert.action }}</strong> &rarr; {{ alert.get_outcome_display|lower }}
+              <span class="text-muted">{{ alert.received_at|date:"j M H:i:s" }}</span></li>
+          {% empty %}
+            <li class="list-group-item text-muted">None (created in Beacon).</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

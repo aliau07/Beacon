@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Django
+*.sqlite3
+*.log
+staticfiles/
+media/
+
+# Node (front-end tooling, if added)
+node_modules/
+
+# Windows download metadata
+*:Zone.Identifier
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

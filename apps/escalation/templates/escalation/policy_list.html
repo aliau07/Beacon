@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Escalation policies · {{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Escalation policies</h2>
+    {% if can_manage %}<a class="btn btn-primary" href="{% url 'escalation:policy_create' team.slug %}">New policy</a>{% endif %}
+  </div>
+  {% for policy in policies %}
+    <a class="card card-body mb-2 text-reset text-decoration-none" href="{{ policy.get_absolute_url }}">
+      <div class="d-flex justify-content-between"><strong>{{ policy.name }}</strong>
+        <span class="small text-muted">{{ policy.services.all|length }} service{{ policy.services.all|length|pluralize }}</span></div>
+      <ol class="small mb-0 mt-1">
+        {% for level in policy.levels.all %}<li>{{ level.target_label }}, then wait {{ level.delay_minutes }} min</li>{% empty %}<li class="text-danger">No levels: nobody gets paged</li>{% endfor %}
+      </ol>
+      {% if policy.repeat_count %}<div class="small text-muted">Repeats {{ policy.repeat_count }} time{{ policy.repeat_count|pluralize }}</div>{% endif %}
+    </a>
+  {% empty %}
+    <p class="text-muted">No escalation policies yet.</p>
+  {% endfor %}
+{% endblock %}

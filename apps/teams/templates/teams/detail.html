@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ team.name }}{% endblock %}
+{% block content %}
+  {% include 'teams/includes/team_nav.html' %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">Members</div>
+        <ul class="list-group list-group-flush">
+          {% for membership in memberships %}
+            <li class="list-group-item d-flex flex-wrap align-items-center gap-2">
+              {% include 'accounts/includes/avatar.html' with person=membership.user size=32 %}
+              <div class="me-auto">
+                <div class="fw-semibold">{{ membership.user.display_name }}</div>
+                <div class="small text-muted">@{{ membership.user.username }} &middot; {{ membership.user.time_zone }}</div>
+              </div>
+              {% if can_manage and membership.user != user %}
+                <form method="post" action="{% url 'teams:member_role' team.slug membership.pk %}" class="d-flex gap-1">
+                  {% csrf_token %}
+                  <select name="role" class="form-select form-select-sm" aria-label="Role for {{ membership.user.username }}">
+                    {% for value, label in roles %}
+                      <option value="{{ value }}" {% if value == membership.role %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn btn-sm btn-outline-secondary">Save</button>
+                </form>
+                <form method="post" action="{% url 'teams:member_remove' team.slug membership.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+              {% else %}
+                <span class="badge text-bg-light border">{{ membership.get_role_display }}</span>
+                {% if membership.user == user %}
+                  <form method="post" action="{% url 'teams:member_remove' team.slug membership.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-secondary">Leave team</button>
+                  </form>
+                {% endif %}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      {% if can_manage %}
+        <form method="post" action="{% url 'teams:member_add' team.slug %}" class="card card-body" novalidate>
+          <h2 class="h5">Add a member</h2>
+          {% csrf_token %}
+          {% with form=add_form %}{% include 'core/includes/form_fields.html' %}{% endwith %}
+          <div><button type="submit" class="btn btn-primary">Add</button></div>
+          {% if not is_owner %}<p class="form-text mb-0 mt-2">Only owners can add or promote owners.</p>{% endif %}
+        </form>
+      {% else %}
+        <div class="card card-body">
+          <h2 class="h5">Your role: {{ role|title }}</h2>
+          <p class="mb-0">Responders acknowledge and resolve incidents, take overrides and write postmortems. Ask an
+            admin to change services, schedules or escalation policies.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

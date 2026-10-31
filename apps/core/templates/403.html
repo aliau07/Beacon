@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Not allowed{% endblock %}
+{% block content %}
+  <h1>Not allowed</h1>
+  <p>{% if exception %}{{ exception }}{% else %}You don't have permission to do that.{% endif %}</p>
+  <a href="{% url 'core:home' %}" class="btn btn-primary">Back to Beacon</a>
+{% endblock %}

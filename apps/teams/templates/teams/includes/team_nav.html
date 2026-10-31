@@ -1,0 +1,13 @@
+<div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0"><a href="{% url 'teams:detail' team.slug %}" class="text-reset text-decoration-none">{{ team.name }}</a></h1>
+</div>
+<ul class="nav nav-tabs mb-4">
+  {% with current=request.resolver_match.app_name %}
+    <li class="nav-item"><a class="nav-link {% if current == 'teams' %}active{% endif %}" href="{% url 'teams:detail' team.slug %}">Members</a></li>
+    <li class="nav-item"><a class="nav-link {% if current == 'services' %}active{% endif %}" href="{% url 'services:list' team.slug %}">Services</a></li>
+    <li class="nav-item"><a class="nav-link {% if current == 'incidents' %}active{% endif %}" href="{% url 'incidents:list' %}?team={{ team.slug }}">Incidents</a></li>
+    <li class="nav-item"><a class="nav-link {% if current == 'oncall' %}active{% endif %}" href="{% url 'oncall:schedule_list' team.slug %}">Schedules</a></li>
+    <li class="nav-item"><a class="nav-link {% if current == 'escalation' %}active{% endif %}" href="{% url 'escalation:policy_list' team.slug %}">Escalation policies</a></li>
+    <li class="nav-item"><a class="nav-link {% if current == 'statuspage' %}active{% endif %}" href="{% url 'statuspage:manage' team.slug %}">Status page</a></li>
+  {% endwith %}
+</ul>

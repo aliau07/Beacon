@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Teams{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Your teams</h1>
+    <a class="btn btn-primary" href="{% url 'teams:create' %}">New team</a>
+  </div>
+  {% if teams %}
+    <div class="list-group">
+      {% for team in teams %}
+        <a class="list-group-item list-group-item-action d-flex justify-content-between" href="{{ team.get_absolute_url }}">
+          <span class="fw-semibold">{{ team.name }}</span>
+          <span class="text-muted">{{ team.memberships.all|length }} member{{ team.memberships.all|length|pluralize }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card card-body">
+      <p class="mb-0">You're not on a team yet. Create one, or ask a team admin to add you by your username
+        (<strong>{{ user.username }}</strong>) or email address.</p>
+    </div>
+  {% endif %}
+{% endblock %}

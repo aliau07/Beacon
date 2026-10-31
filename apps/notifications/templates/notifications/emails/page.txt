@@ -1,0 +1,12 @@
+Hi {{ user.get_username }},
+
+You are being paged for incident #{{ incident.pk }} on {{ incident.service.name }} ({{ incident.team.name }}).
+
+  {{ incident.get_severity_display }}: {{ incident.summary }}
+  Why you: {{ reason }}
+
+Acknowledge it to stop the escalation, or resolve it when it's over:
+
+{{ site_url }}{{ incident_path }}
+
+Beacon

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Your profile{% endblock %}
+{% block content %}
+  <h1>Your profile</h1>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <form method="post" enctype="multipart/form-data" class="card card-body" novalidate>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          {% include 'accounts/includes/avatar.html' with person=user size=64 %}
+          <div><strong>{{ user.display_name }}</strong><div class="text-muted">@{{ user.username }}</div></div>
+        </div>
+        {% csrf_token %}
+        {% include 'core/includes/form_fields.html' %}
+        <div><button type="submit" class="btn btn-primary">Save changes</button></div>
+      </form>
+    </div>
+    <div class="col-lg-5">
+      <div class="card card-body mb-3">
+        <h2 class="h5">Time zone</h2>
+        <p class="mb-0">Incident times, schedules and shift handoffs are shown in <strong>{{ user.time_zone }}</strong>.
+          Rotations still hand off at their own local time.</p>
+      </div>
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{% url 'teams:list' %}">Your teams</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'notifications:inbox' %}">Inbox</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'accounts:password_change' %}">Change password</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
